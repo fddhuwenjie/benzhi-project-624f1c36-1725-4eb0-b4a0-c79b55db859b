@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>广播母版响度交付门禁</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div><p class="kicker">MASTER DELIVERY CONTROL</p><h1>广播母版响度交付门禁</h1></div>
+    <div class="header-actions"><input id="caseSearch" aria-label="按节目编号筛选" placeholder="节目编号"><input id="engineerFilter" aria-label="按工程师筛选" placeholder="工程师"><input id="approvedFrom" type="date" aria-label="批准开始日期" title="批准开始日期"><input id="approvedTo" type="date" aria-label="批准结束日期" title="批准结束日期"><select id="stateFilter" aria-label="按状态筛选"><option value="">全部状态</option><option value="draft">草稿</option><option value="pending_review">待复核</option><option value="approved">已批准</option><option value="rejected">已拒绝</option></select><select id="casePicker" aria-label="选择案件"><option value="">选择案件</option></select><button id="refreshBtn" class="icon-button" title="刷新案件" aria-label="刷新案件">↻</button><button id="newCaseBtn">新建案件</button></div>
+  </header>
+  <main>
+    <section id="emptyState" class="empty-state"><h2>没有打开的交付案件</h2><p>从右上角新建节目母版案件，冻结标准后开始登记证据。</p></section>
+    <div id="workspace" hidden>
+      <section class="status-band"><div><span class="label">案件</span><strong id="caseTitle"></strong></div><div><span class="label">状态</span><strong id="caseState"></strong></div><div><span class="label">修订</span><strong id="caseRevision"></strong></div><div><span class="label">完整性</span><strong id="integrity"></strong></div><div class="status-actions"><button id="editCaseBtn">修订元数据</button><button id="freezeBtn">冻结基线</button></div></section>
+      <nav class="tabs" aria-label="案件视图"><button class="tab active" data-tab="evidence">证据与测量</button><button class="tab" data-tab="results">规则与偏差</button><button class="tab" data-tab="review">独立复核</button><button class="tab" data-tab="timeline">审计时间线</button><button class="tab" data-tab="manifest">交付清单</button></nav>
+      <section class="tab-panel active" id="tab-evidence">
+        <div class="section-heading"><div><h2>节目分段</h2><p id="segmentBoundary"></p></div><button id="addSegmentBtn">登记分段</button></div>
+        <div id="coverageView" class="coverage-view"></div>
+        <div class="table-wrap"><table><thead><tr><th>标识 / 标题</th><th>时间范围</th><th>声道</th><th>音频摘要</th><th>校准引用</th><th>操作</th></tr></thead><tbody id="segmentsBody"></tbody></table></div>
+        <div class="section-heading"><div><h2>测量版本</h2><p>整体与每个分段均需提交完整测量。</p></div><div class="inline-actions"><button id="batchMeasurementBtn">批次 JSON</button><button id="addMeasurementBtn">提交测量</button></div></div>
+        <div class="table-wrap"><table><thead><tr><th>版本 / 范围</th><th>集成响度</th><th>响度范围</th><th>真峰值</th><th>门限</th><th>证据摘要</th></tr></thead><tbody id="measurementsBody"></tbody></table></div>
+        <div class="command-row"><button id="evaluateBtn" class="primary">执行确定性判定</button></div>
+      </section>
+      <section class="tab-panel" id="tab-results">
+        <div class="section-heading"><div><h2>规则结果</h2><p id="snapshotSummary">冻结标准下的逐范围确定性结论。</p></div><label class="inline-check"><input id="affectedOnly" type="checkbox"> 仅看本次受影响</label></div>
+        <div id="ruleResults" class="result-list"></div>
+        <div class="section-heading"><div><h2>偏差队列</h2><p id="deviationSummary">失败规则需登记原因、替代摘要并关联复测。</p></div></div>
+        <div id="deviationList" class="deviation-list"></div>
+      </section>
+      <section class="tab-panel" id="tab-review">
+        <div class="section-heading"><div><h2>复核就绪度证据矩阵</h2><p id="readinessSummary">正在核对当前修订的复核证据。</p></div><button id="refreshReadinessBtn">刷新矩阵</button></div>
+        <div id="readinessMatrix" class="readiness-matrix"></div>
+        <div class="review-layout"><div><h2>独立复核</h2><p>复核员必须不同于案件工程师，每项批注可引用事件或测量标识。</p><label>基线批注<textarea name="baseline_comment" form="reviewForm" rows="2" required></textarea></label><label>证据批注<textarea name="evidence_comment" form="reviewForm" rows="2" required></textarea></label><label>规则批注<textarea name="rules_comment" form="reviewForm" rows="2" required></textarea></label><label>整改批注<textarea name="remediation_comment" form="reviewForm" rows="2" required></textarea></label></div><form id="reviewForm"><label>证据引用<input name="evidence_ref" placeholder="可选：事件或测量标识"></label><label>复核员标识<input name="reviewer_id" required></label><label>结论<select name="decision"><option value="approve">批准并封存</option><option value="reject">拒绝交付</option></select></label><label>拒绝代码<input name="rejection_code" placeholder="仅拒绝时填写"></label><label>拒绝说明<textarea name="rejection_detail" rows="3"></textarea></label><button class="primary" type="submit">提交复核结论</button></form></div>
+      </section>
+      <section class="tab-panel" id="tab-timeline"><div class="section-heading"><div><h2>审计时间线</h2><p>每个事件包含前序摘要和自身 SHA-256 摘要。</p></div></div><ol id="timelineList" class="timeline"></ol></section>
+      <section class="tab-panel" id="tab-manifest"><div class="section-heading"><div><h2>不可变交付清单</h2><p>批准后以稳定字段顺序封存，可随时重新计算校验。</p></div><button id="verifyBtn">重新校验</button></div><div id="verification" class="verification"></div><pre id="manifestView">尚未生成交付清单</pre></section>
+    </div>
+  </main>
+  <dialog id="formDialog"><form method="dialog" id="dialogForm"><div class="dialog-title"><h2 id="dialogTitle"></h2><button value="cancel" class="icon-button" aria-label="关闭">×</button></div><div id="dialogFields" class="form-grid"></div><div class="dialog-actions"><button value="cancel">取消</button><button value="default" id="dialogSubmit" class="primary">提交</button></div></form></dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="/assets/app.js" defer></script>
+</body>
+</html>
